@@ -489,8 +489,8 @@ user_mem = kmap_atomic(page);
 
 	handle = zs_malloc(meta->mem_pool, clen);
 	if (!handle) {
-		pr_info("Error allocating memory for compressed "
-			"page: %u, size=%zu\n", index, clen);
+		pr_info("Error allocating memory for compressed page: %u, size=%zu\n",
+			index, clen);
 		ret = -ENOMEM;
 		goto out;
 	}
