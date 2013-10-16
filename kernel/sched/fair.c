@@ -2284,7 +2284,12 @@ static int do_sched_cfs_period_timer(struct cfs_bandwidth *cfs_b, int overrun)
 	/* if we're going inactive then everything else can be deferred */
 	if (idle)
 		goto out_unlock;
-
+	/*
+	 * if we have relooped after returning idle once, we need to update our
+	 * status as actually running, so that other cpus doing
+	 * __start_cfs_bandwidth will stop trying to cancel us.
+	 */
+	cfs_b->timer_active = 1;
 	__refill_cfs_bandwidth_runtime(cfs_b);
 
 	if (!throttled) {
