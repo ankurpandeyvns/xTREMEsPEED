@@ -109,7 +109,7 @@ static ssize_t zero_pages_show(struct device *dev,
 {
 	struct zram *zram = dev_to_zram(dev);
 
-	return sprintf(buf, "%u\n", atomic_read(&zram->stats.pages_zero));
+	return sprintf(buf, "%llu\n", (u64)atomic64_read(&zram->stats.zero_pages));
 }
 
 static ssize_t orig_data_size_show(struct device *dev,
@@ -118,7 +118,7 @@ static ssize_t orig_data_size_show(struct device *dev,
 	struct zram *zram = dev_to_zram(dev);
 
 	return sprintf(buf, "%llu\n",
-		(u64)(atomic_read(&zram->stats.pages_stored)) << PAGE_SHIFT);
+		(u64)(atomic64_read(&zram->stats.pages_stored)) << PAGE_SHIFT);
 }
 
 static ssize_t compr_data_size_show(struct device *dev,
@@ -127,7 +127,7 @@ static ssize_t compr_data_size_show(struct device *dev,
 	struct zram *zram = dev_to_zram(dev);
 
 	return sprintf(buf, "%llu\n",
-			(u64)atomic64_read(&zram->stats.compr_size));
+			(u64)atomic64_read(&zram->stats.compr_data_size));
 }
 
 static ssize_t mem_used_total_show(struct device *dev,
@@ -300,15 +300,15 @@ static void zram_free_page(struct zram *zram, size_t index)
 		 */
 		if (zram_test_flag(meta, index, ZRAM_ZERO)) {
 			zram_clear_flag(meta, index, ZRAM_ZERO);
-			atomic_dec(&zram->stats.pages_zero);
+			atomic64_dec(&zram->stats.zero_pages);
 		}
 		return;
 	}
 
 	zs_free(meta->mem_pool, handle);
 
-	atomic64_sub(meta->table[index].size, &zram->stats.compr_size);
-	atomic_dec(&zram->stats.pages_stored);
+	atomic64_sub(meta->table[index].size, &zram->stats.compr_data_size);
+	atomic64_dec(&zram->stats.pages_stored);
 
 	meta->table[index].handle = 0;
 	meta->table[index].size = 0;
@@ -450,7 +450,7 @@ user_mem = kmap_atomic(page);
 		zram_free_page(zram, index);
 		zram_set_flag(meta, index, ZRAM_ZERO);
 		write_unlock(&zram->meta->tb_lock);
-		atomic_inc(&zram->stats.pages_zero);
+		atomic64_inc(&zram->stats.zero_pages);
 		ret = 0;
 		goto out;
 	}
@@ -502,8 +502,8 @@ user_mem = kmap_atomic(page);
 	write_unlock(&zram->meta->tb_lock);
 
 	/* Update stats */
-	atomic64_add(clen, &zram->stats.compr_size);
-	atomic_inc(&zram->stats.pages_stored);
+	atomic64_add(clen, &zram->stats.compr_data_size);
+	atomic64_inc(&zram->stats.pages_stored);
 out:
 	if (locked)
 		mutex_unlock(&meta->buffer_lock);
