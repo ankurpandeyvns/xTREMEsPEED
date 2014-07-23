@@ -321,18 +321,7 @@ static void do_input_boost(struct work_struct *work)
 	pr_debug("Setting input boost min for all CPUs\n");
 	for_each_possible_cpu(i) {
 		i_sync_info = &per_cpu(sync_info, i);
-		ret = cpufreq_get_policy(&policy, i);
-		if (ret)
-			continue;
-		if (policy.cur >= i_sync_info->input_boost_freq)
-			continue;
-
-		cancel_delayed_work_sync(&i_sync_info->input_boost_rem);
 		i_sync_info->input_boost_min = i_sync_info->input_boost_freq;
-		cpufreq_update_policy(i);
-		queue_delayed_work_on(i_sync_info->cpu, cpu_boost_wq,
-			&i_sync_info->input_boost_rem,
-			msecs_to_jiffies(input_boost_ms));
 	}
 
 	/* Update policies for all online CPUs */
@@ -451,8 +440,8 @@ static int cpu_boost_init(void)
 		atomic_set(&s->being_woken, 0);
 		spin_lock_init(&s->lock);
 		INIT_DELAYED_WORK(&s->boost_rem, do_boost_rem);
-		s->thread = kthread_run(boost_mig_sync_thread, (void *)cpu,
-					"boost_sync/%d", cpu);
+		s->thread = kthread_run(boost_mig_sync_thread,
+				(void *) (long)cpu, "boost_sync/%d", cpu);
 		set_cpus_allowed(s->thread, *cpumask_of(cpu));
 	}
 	cpufreq_register_notifier(&boost_adjust_nb, CPUFREQ_POLICY_NOTIFIER);
