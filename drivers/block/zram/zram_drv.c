@@ -558,7 +558,7 @@ user_mem = kmap_atomic(page);
 	}
 
 	if (page_zero_filled(uncmem)) {
-		if (!is_partial_io(bvec))
+		if (user_mem)
 			kunmap_atomic(user_mem);
 		/* Free memory associated with this sector now. */
 		bit_spin_lock(ZRAM_ACCESS, &meta->table[index].value);
