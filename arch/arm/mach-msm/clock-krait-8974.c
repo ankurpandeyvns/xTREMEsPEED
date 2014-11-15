@@ -31,6 +31,11 @@
 #include "clock-krait.h"
 #include "clock.h"
 
+#ifdef CONFIG_SPEED_LEVEL_INTERFACE
+int speed_level = -1;
+module_param(speed_level, int, S_IRUGO);
+#endif
+
 /* Clock inputs coming into Krait subsystem */
 DEFINE_FIXED_DIV_CLK(hfpll_src_clk, 1, NULL);
 DEFINE_FIXED_DIV_CLK(acpu_aux_clk, 2, NULL);
@@ -462,6 +467,32 @@ static void get_krait_bin_format_b(struct platform_device *pdev,
 		*speed = 0;
 	}
 
+#ifdef CONFIG_PVS_LEVEL_INTERFACE
+        speed_level = *speed;
+#endif
+
+	/* Check SVS PVS bin */
+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "efuse_svs");
+	if (res) {
+		base_svs = devm_ioremap(&pdev->dev, res->start,
+					resource_size(res));
+		/* Read the svs pvs value if status bit 28 is valid (set) */
+		if (!base_svs) {
+			*svs_pvs = 0;
+			dev_warn(&pdev->dev,
+			 "Unable to read svs efuse data. Defaulting to 0!\n");
+		} else {
+			pte_efuse = readl_relaxed(base_svs);
+			/*
+			 * Read the svs pvs value if status bit 28 is valid
+			 * 4 bits of SVS PVS are in efuse register bits 27-24
+			 */
+			if (pte_efuse & BIT(28))
+				*svs_pvs = (pte_efuse >> 24) & 0xF;
+
+			devm_iounmap(&pdev->dev, base_svs);
+		}
+	}
 	/* Check PVS_BLOW_STATUS */
 	pte_efuse = readl_relaxed(base + 0x4) & BIT(21);
 	if (pte_efuse) {
