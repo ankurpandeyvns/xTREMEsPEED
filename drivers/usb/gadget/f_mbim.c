@@ -722,7 +722,6 @@ static int mbim_bam_disconnect(struct f_mbim *dev)
 {
 	pr_info("dev:%pK port:%d. Do nothing.\n",
 			dev, dev->port_num);
-
 	bam_data_disconnect(&dev->bam_port, dev->port_num);
 
 	return 0;
