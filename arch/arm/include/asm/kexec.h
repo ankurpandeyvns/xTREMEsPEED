@@ -18,7 +18,7 @@
 #define KEXEC_ARM_ZIMAGE_OFFSET 0x8000
 
 #ifdef CONFIG_KEXEC_HARDBOOT
-#define KEXEC_HB_PAGE_MAGIC 0x4a5db007
+  #define KEXEC_HB_PAGE_MAGIC 0x4a5db007
 #endif
 
 #ifndef __ASSEMBLY__
@@ -60,7 +60,7 @@ extern void (*kexec_reinit)(void);
 #ifdef CONFIG_KEXEC_HARDBOOT
 extern void (*kexec_hardboot_hook)(void);
 #endif
- 
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* CONFIG_KEXEC */

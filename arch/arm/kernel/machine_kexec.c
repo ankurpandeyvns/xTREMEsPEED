@@ -31,7 +31,7 @@ extern unsigned long kexec_boot_atags_len;
 extern unsigned long kexec_kernel_len;
 void (*kexec_hardboot_hook)(void);
 #endif
- 
+
 static atomic_t waiting_for_crash_ipi;
 
 /*
@@ -41,7 +41,7 @@ static atomic_t waiting_for_crash_ipi;
 
 int machine_kexec_prepare(struct kimage *image)
 {
-    	struct kexec_segment *current_segment;
+	struct kexec_segment *current_segment;
 	__be32 header;
 	int i, err;
 
@@ -164,7 +164,7 @@ void machine_kexec(struct kimage *image)
 	mem_text_write_kernel_word(&kexec_indirection_page, page_list);
 	mem_text_write_kernel_word(&kexec_mach_type, machine_arch_type);
 	if (!kexec_boot_atags)
- 		mem_text_write_kernel_word(&kexec_boot_atags, image->start KEXEC_ARM_ZIMAGE_OFFSET + KEXEC_ARM_ATAGS_OFFSET);
+		mem_text_write_kernel_word(&kexec_boot_atags, image->start - KEXEC_ARM_ZIMAGE_OFFSET + KEXEC_ARM_ATAGS_OFFSET);
 #ifdef CONFIG_KEXEC_HARDBOOT
 	mem_text_write_kernel_word(&kexec_hardboot, image->hardboot);
 #endif
@@ -187,6 +187,12 @@ void machine_kexec(struct kimage *image)
 		kexec_hardboot_hook();
 #endif
 
-    
 	soft_restart(reboot_code_buffer_phys);
+}
+
+void arch_crash_save_vmcoreinfo(void)
+{
+#ifdef CONFIG_ARM_LPAE
+	VMCOREINFO_CONFIG(ARM_LPAE);
+#endif
 }
