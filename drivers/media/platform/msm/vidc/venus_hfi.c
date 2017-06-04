@@ -2496,6 +2496,7 @@ static int venus_hfi_session_abort(void *session)
 static int venus_hfi_session_clean(void *session)
 {
 	struct hal_session *sess_close;
+    struct venus_hfi_device *device;
 	if (!session) {
 		dprintk(VIDC_ERR, "Invalid Params %s", __func__);
 		return -EINVAL;
