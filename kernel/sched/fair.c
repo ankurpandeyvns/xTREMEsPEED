@@ -3873,15 +3873,11 @@ next:
  */
 static void __update_blocked_averages_cpu(struct task_group *tg, int cpu)
 {
-	struct cfs_rq *cfs_rq;
-	unsigned long flags;
 	struct rq *rq;
-
 	if (!tg->se[cpu])
 		return 0;
 
 	rq = cpu_rq(cpu);
-	cfs_rq = tg->cfs_rq[cpu];
 	struct sched_entity *se = tg->se[cpu];
 	struct cfs_rq *cfs_rq = tg->cfs_rq[cpu];
 	/* throttled entities do not contribute to load */
@@ -4578,12 +4574,6 @@ static inline void update_sd_lb_stats(struct sched_domain *sd, int this_cpu,
 		update_sd_power_savings_stats(sg, sds, local_group, &sgs);
 		sg = sg->next;
 	} while (sg != sd->groups);
-
-	if (!env->sd->parent) {
-		/* update overload indicator if we are at root domain */
-		if (env->dst_rq->rd->overload != overload)
-			env->dst_rq->rd->overload = overload;
-	}
 }
 
 /**

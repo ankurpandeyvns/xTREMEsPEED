@@ -880,28 +880,6 @@ static ssize_t store_align_windows(struct kobject *kobj,
 {
 	int ret;
 	unsigned long val;
-	ret = kstrtoul(buf, 0, &val);
-	if (ret < 0)
-		return ret;
-	max_freq_hysteresis = val;
-	return count;
-}
-
-static struct global_attr max_freq_hysteresis_attr =
-	__ATTR(max_freq_hysteresis, 0644, show_max_freq_hysteresis,
-		store_max_freq_hysteresis);
-
-static ssize_t show_align_windows(struct kobject *kobj,
-				     struct attribute *attr, char *buf)
-{
-	return sprintf(buf, "%u\n", align_windows);
-}
-
-static ssize_t store_align_windows(struct kobject *kobj,
-			struct attribute *attr, const char *buf, size_t count)
-{
-	int ret;
-	unsigned long val;
 
 	ret = kstrtoul(buf, 0, &val);
 	if (ret < 0)
