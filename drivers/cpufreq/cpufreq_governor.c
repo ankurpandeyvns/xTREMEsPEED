@@ -19,7 +19,7 @@
 #include <linux/export.h>
 #include <linux/kernel_stat.h>
 #include <linux/slab.h>
-
+#include <linux/cpufreq.h>
 #include "cpufreq_governor.h"
 
 static struct attribute_group *get_sysfs_attr(struct dbs_data *dbs_data)

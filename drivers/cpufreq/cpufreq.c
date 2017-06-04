@@ -25,11 +25,12 @@
 #include <linux/spinlock.h>
 #include <linux/device.h>
 #include <linux/slab.h>
+#include <linux/tick.h>
 #include <linux/cpu.h>
 #include <linux/completion.h>
 #include <linux/mutex.h>
+#include <linux/kernel_stat.h>
 #include <linux/syscore_ops.h>
-
 #include <trace/events/power.h>
 
 /**
@@ -48,8 +49,6 @@ struct cpufreq_cpu_save_data {
 static DEFINE_PER_CPU(struct cpufreq_cpu_save_data, cpufreq_policy_save);
 #endif
 static DEFINE_SPINLOCK(cpufreq_driver_lock);
-static struct kset *cpufreq_kset;
-static struct kset *cpudev_kset;
 DEFINE_MUTEX(cpufreq_governor_lock);
 
 /*
@@ -450,7 +449,6 @@ out:
  * Write out information from cpufreq_driver->policy[cpu]; object must be
  * "unsigned int".
  */
-
 #define show_one(file_name, object)			\
 static ssize_t show_##file_name				\
 (struct cpufreq_policy *policy, char *buf)		\
